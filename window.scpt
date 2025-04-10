@@ -26,6 +26,7 @@ on run argv
     try
         -- Get alignment from argument or use default
         set align to "l" -- default
+        set repeatTimeLimit to 5 -- seconds
         if (count of argv) > 0 then
             set align to item 1 of argv
             if align is not in {"l", "r", "c"} then
@@ -37,10 +38,10 @@ on run argv
         set currentTime to ((current date) - (date "Thursday, January 1, 1970 at 00:00:00")) as number
         log "Start time (seconds since epoch): " & currentTime
         
-        set wRatio to {0.5, 0.67, 0.75, 1}
+        set wRatio to {0.5, 0.67, 0.75, 1, 0.25, 0.33}
         set screenWidth to 2560
         set screenHeight to 1440
-        set tmpFile to (POSIX path of (path to temporary items folder)) & "window_index.txt"
+        set tmpFile to (POSIX path of (path to home folder)) & ".window_index"
         
         -- Read index and timestamp from temp file or initialize
         try
@@ -59,10 +60,10 @@ on run argv
             -- 2. Reset index if more than 5 seconds elapsed
             set elapsedTime to currentTime - previousTime
             -- log "Elapsed time since last execution: " & elapsedTime & " seconds"
-            if elapsedTime > 5 then
-                -- Reset index if more than 5 seconds elapsed
+            if elapsedTime > repeatTimeLimit then
+                -- Reset index if more than repeatTimeLimit seconds elapsed
                 set i to 1
-                log "More than 5 seconds elapsed, resetting window size index to 1"
+                log "More than " & repeatTimeLimit & " seconds elapsed, resetting window size index to 1"
             end if
 
             -- 3. Reset index if alignment changed
