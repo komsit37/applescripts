@@ -100,11 +100,17 @@ on run argv
                         set position to {(screenWidth - windowWidth) / 2, 0}
                         set size to {windowWidth, screenHeight}
                     else if align is "t" then
-                        set position to {0, 0}
-                        set size to {screenWidth, windowHeight}
+                        -- Get current position and size
+                        set {currentX, currentY} to position
+                        set {currentWidth, currentHeight} to size
+                        set position to {currentX, 0}
+                        set size to {currentWidth, windowHeight}
                     else if align is "b" then
-                        set position to {0, screenHeight - windowHeight}
-                        set size to {screenWidth, windowHeight}
+                        -- Get current position and size
+                        set {currentX, currentY} to position
+                        set {currentWidth, currentHeight} to size
+                        set position to {currentX, screenHeight - windowHeight}
+                        set size to {currentWidth, windowHeight}
                     end if
                 end tell
             end tell
