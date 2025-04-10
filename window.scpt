@@ -9,6 +9,8 @@ Arguments:
     "l" - Left align (default)
     "r" - Right align
     "c" - Center align
+    "t" - Top align
+    "b" - Bottom align
 
 Behavior:
 - Cycles through window sizes on each execution
@@ -20,6 +22,8 @@ Example usage:
     osascript window.scpt       # Left alignment (default)
     osascript window.scpt r     # Right alignment
     osascript window.scpt c     # Center alignment
+    osascript window.scpt t     # Top alignment
+    osascript window.scpt b     # Bottom alignment
 *)
 
 on run argv
@@ -29,8 +33,8 @@ on run argv
         set repeatTimeLimit to 5 -- seconds
         if (count of argv) > 0 then
             set align to item 1 of argv
-            if align is not in {"l", "r", "c"} then
-                log "Invalid alignment. Using default (l). Options: [l]eft, [r]ight, [c]enter"
+            if align is not in {"l", "r", "c", "t", "b"} then
+                log "Invalid alignment. Using default (l). Options: [l]eft, [r]ight, [c]enter, [t]op, [b]ottom"
             end if
         end if
         
@@ -83,17 +87,25 @@ on run argv
                 set frontWindow to first window
                 tell frontWindow
                     set windowWidth to screenWidth * item i of wRatio
+                    set windowHeight to screenHeight * item i of wRatio
                     
                     -- Set position based on alignment
                     if align is "l" then
                         set position to {0, 0}
+                        set size to {windowWidth, screenHeight}
                     else if align is "r" then
                         set position to {screenWidth - windowWidth, 0}
+                        set size to {windowWidth, screenHeight}
                     else if align is "c" then
                         set position to {(screenWidth - windowWidth) / 2, 0}
+                        set size to {windowWidth, screenHeight}
+                    else if align is "t" then
+                        set position to {0, 0}
+                        set size to {screenWidth, windowHeight}
+                    else if align is "b" then
+                        set position to {0, screenHeight - windowHeight}
+                        set size to {screenWidth, windowHeight}
                     end if
-                    
-                    set size to {windowWidth, screenHeight}
                 end tell
             end tell
         end tell
