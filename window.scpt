@@ -105,19 +105,29 @@ on run argv
 
                     -- Set screen size based on monitor
                     -- x, y coordinates are absolute of the combination of both monitors: (0 to 3640) x (-480 to 1440)
-                    -- -100 to assume it's on Monitor 2 when the edge is close to the right
-                    if current_x < (MONITOR1_W - 100) then
+                    -- add some slack to assume it's on Monitor 2 when the edge is close to the right
+                    if current_x < (MONITOR1_W - 200) then
                         log "On Monitor 1!"
+                        if align is in {"r", "l", "c"} then
+                            set wRatio to {0.5, 0.67, 0.75, 1, 0.25, 0.33}
+                        else if align is in {"t", "b"} then
+                            set wRatio to {0.5, 0.67, 1, 0.33}
+                        end if
                         set screen_w to MONITOR1_W
                         set screen_h to MONITOR1_H
                         set start_pos_x to 0
                         set start_pos_y to 0
                     else
                         log "On Monitor 2!"
+                        if align is in {"r", "l", "c"} then
+                            set wRatio to {1, 0.5}
+                        else if align is in {"t", "b"} then
+                            set wRatio to {0.5, 0.67, 1, 0.33}
+                        end if
                         set screen_w to MONITOR2_W
                         set screen_h to MONITOR2_H
                         set start_pos_x to MONITOR1_W
-                        set start_pos_y to -480 -- since M2 is taller than M1, the starting y is negative
+                        set start_pos_y to -133
                     end if
                     log "Screen size: " & screen_w & ", " & screen_h
 
@@ -132,13 +142,13 @@ on run argv
                         set position to {start_pos_x + screen_w - window_w, start_pos_y}
                         set size to {window_w, screen_h}
                     else if align is "c" then
-                        set position to {(screen_w - window_w) / 2, start_pos_y}
+                        set position to {start_pos_x +(screen_w - window_w) / 2, start_pos_y}
                         set size to {window_w, screen_h}
                     else if align is "t" then
                         set position to {current_x, start_pos_y}
                         set size to {current_w, window_h}
                     else if align is "b" then
-                        set position to {current_x, screen_h - window_h}
+                        set position to {current_x, screen_h - window_h + start_pos_y}
                         set size to {current_w, window_h}
                     end if
                 end tell
