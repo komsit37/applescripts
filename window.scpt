@@ -2,7 +2,12 @@
 Window Manager Script
 --------------------
 This script manages window sizes and positions on macOS. It cycles through predefined
-window widths (50%, 67%, 75%, 100%) while maintaining full height.
+window widths and heights.
+
+Monitor Setup:
+- Monitor 1 (Primary): 2560x1440
+- Monitor 2 (Secondary, Portrait): 1080x1920
+- Coordinates span across both monitors: (0 to 3640) x (-480 to 1440)
 
 Arguments:
 - align: Optional window alignment [string]
@@ -13,6 +18,7 @@ Arguments:
     "b" - Bottom align
 
 Behavior:
+- Automatically detects which monitor the window is on
 - Cycles through window sizes on each execution
 - Resets to smallest size after 5 seconds of inactivity
 - Resets when alignment changes
@@ -42,9 +48,6 @@ on run argv
         set currentTime to ((current date) - (date "Thursday, January 1, 1970 at 00:00:00")) as number
         log "Start time (seconds since epoch): " & currentTime
         
-        set wRatio to {0.5, 0.67, 0.75, 1, 0.25, 0.33}
-        set screenWidth to 2560
-        set screenHeight to 1440
         set tmpFile to (POSIX path of (path to home folder)) & ".window_index"
         
         -- Read index and timestamp from temp file or initialize
@@ -86,30 +89,57 @@ on run argv
             tell (first process whose frontmost is true)
                 set frontWindow to first window
                 tell frontWindow
-                    set windowWidth to screenWidth * item i of wRatio
-                    set windowHeight to screenHeight * item i of wRatio
-
                     -- for 't' and 'b' to keep current width and x
                     -- Get current position and size
-                    set {currentX, currentY} to position
-                    set {currentWidth, currentHeight} to size
+                    set {current_x, current_y} to position
+                    set {current_w, current_h} to size
+                    log "Current position: " & current_x & ", " & current_y
+                    log "Current size: " & current_w & ", " & current_h
+
+                    set wRatio to {0.5, 0.67, 0.75, 1, 0.25, 0.33}
+                    set MONITOR1_W to 2560
+                    set MONITOR1_H to 1440
+
+                    set MONITOR2_W to 1080
+                    set MONITOR2_H to 1920
+
+                    -- Set screen size based on monitor
+                    -- x, y coordinates are absolute of the combination of both monitors: (0 to 3640) x (-480 to 1440)
+                    -- -100 to assume it's on Monitor 2 when the edge is close to the right
+                    if current_x < (MONITOR1_W - 100) then
+                        log "On Monitor 1!"
+                        set screen_w to MONITOR1_W
+                        set screen_h to MONITOR1_H
+                        set start_pos_x to 0
+                        set start_pos_y to 0
+                    else
+                        log "On Monitor 2!"
+                        set screen_w to MONITOR2_W
+                        set screen_h to MONITOR2_H
+                        set start_pos_x to MONITOR1_W
+                        set start_pos_y to -480 -- since M2 is taller than M1, the starting y is negative
+                    end if
+                    log "Screen size: " & screen_w & ", " & screen_h
+
+                    set window_w to screen_w * item i of wRatio
+                    set window_h to screen_h * item i of wRatio
                     
                     -- Set position based on alignment
                     if align is "l" then
-                        set position to {0, 0}
-                        set size to {windowWidth, screenHeight}
+                        set position to {start_pos_x, start_pos_y}
+                        set size to {window_w, screen_h}
                     else if align is "r" then
-                        set position to {screenWidth - windowWidth, 0}
-                        set size to {windowWidth, screenHeight}
+                        set position to {start_pos_x + screen_w - window_w, start_pos_y}
+                        set size to {window_w, screen_h}
                     else if align is "c" then
-                        set position to {(screenWidth - windowWidth) / 2, 0}
-                        set size to {windowWidth, screenHeight}
+                        set position to {(screen_w - window_w) / 2, start_pos_y}
+                        set size to {window_w, screen_h}
                     else if align is "t" then
-                        set position to {currentX, 0}
-                        set size to {currentWidth, windowHeight}
+                        set position to {current_x, start_pos_y}
+                        set size to {current_w, window_h}
                     else if align is "b" then
-                        set position to {currentX, screenHeight - windowHeight}
-                        set size to {currentWidth, windowHeight}
+                        set position to {current_x, screen_h - window_h}
+                        set size to {current_w, window_h}
                     end if
                 end tell
             end tell

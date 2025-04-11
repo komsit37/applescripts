@@ -18,3 +18,4 @@ set monitor2Resolution to getMonitorResolution(2)
 
 log "First Monitor Resolution: " & item 1 of monitor1Resolution & " x " & item 2 of monitor1Resolution
 log "Second Monitor Resolution: " & item 1 of monitor2Resolution & " x " & item 2 of monitor2Resolution
+
