@@ -161,7 +161,9 @@ on run argv
             
             -- Fall back to expensive frontmost search if cache failed
             if targetProcess is missing value then
-                set targetProcess to (first process whose frontmost is true)
+                -- set targetProcess to (first process whose frontmost is true)
+                -- more specific and doesn't include background-only processes
+                set targetProcess to first application process whose frontmost is true
             end if
             
             set currentProcessName to name of targetProcess
